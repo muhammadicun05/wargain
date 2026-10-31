@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: wargain
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SECRET_KEY_BLIND
+        value: "blind-index-key-secret-2026-wargain-pdp-safe-9871"
+      - key: SECRET_KEY_DATA
+        value: "data-encryption-aes-gcm-key-2026-wargain-secure-7621"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wargain-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+
+databases:
+  - name: wargain-db
+    databaseName: wargain_v2
+    user: wargain_user
+    plan: free
