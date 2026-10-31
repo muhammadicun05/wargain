@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftarkan Warga Baru — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+
+    <div>
+        <a href="{% url 'portal:warga_list' %}" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+            &larr; Kembali ke Daftar Warga
+        </a>
+        <h1 class="text-2xl font-black text-slate-800 mt-2">Pendaftaran Warga Baru</h1>
+        <p class="text-sm text-slate-500">
+            Pencatatan data kependudukan warga baru untuk lingkungan RT dan RW.
+        </p>
+    </div>
+
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Nomor Induk Kependudukan (NIK) *
+                    </label>
+                    <input type="text" name="nik" maxlength="16" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm font-mono"
+                        placeholder="16 digit angka sesuai KTP">
+                    <span class="text-[11px] text-slate-400 mt-1 block">Tersimpan dalam bentuk tersandi, hanya ditampilkan tersamar.</span>
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Nama Lengkap (Sesuai KTP) *
+                    </label>
+                    <input type="text" name="nama_lengkap" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                        placeholder="Nama lengkap tanpa gelar disingkat">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Tempat Lahir *
+                    </label>
+                    <input type="text" name="tempat_lahir" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                        placeholder="Contoh: Bandung">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Tanggal Lahir *
+                    </label>
+                    <input type="date" name="tanggal_lahir" required
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Jenis Kelamin *
+                    </label>
+                    <select name="jenis_kelamin" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                        {% for val, label in jk_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Agama *
+                    </label>
+                    <select name="agama" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                        {% for val, label in agama_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Status Perkawinan *
+                    </label>
+                    <select name="status_perkawinan" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                        {% for val, label in status_kawin_choices %}
+                            <option value="{{ val }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Pekerjaan
+                    </label>
+                    <input type="text" name="pekerjaan"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                        placeholder="Contoh: Karyawan Swasta">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                        Nomor WhatsApp / HP
+                    </label>
+                    <input type="tel" name="nomor_telepon"
+                        class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 outline-none text-sm"
+                        placeholder="Contoh: 081234567890">
+                </div>
+            </div>
+
+            <!-- Tri-Axial Dwelling Linkage Section -->
+            <div class="pt-6 border-t border-slate-200">
+                <div class="mb-3">
+                    <h3 class="text-sm font-bold text-slate-800">Alamat Tempat Tinggal Fisik (Hunian)</h3>
+                    <p class="text-xs text-slate-500">Hubungkan warga dengan hunian di wilayah RT setempat (meskipun KTP luar daerah).</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            Pilih Rumah / Kamar Kos
+                        </label>
+                        <select name="hunian_id" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                            <option value="">-- Tidak Dikaitkan Sekarang --</option>
+                            {% for h in hunian_list %}
+                                <option value="{{ h.id }}">{{ h.nomor_rumah }} ({{ h.rt.nama }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                            Peran di Hunian
+                        </label>
+                        <select name="peran_di_hunian" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none">
+                            {% for val, label in peran_choices %}
+                                <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex items-center justify-end space-x-3">
+                <a href="{% url 'portal:warga_list' %}" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow transition">
+                    Simpan Data Warga
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Ajukan Surat Pengantar — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto space-y-6">
+
+    <div>
+        <a href="{% url 'portal:surat_list' %}" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+            &larr; Kembali ke Daftar Surat
+        </a>
+        <h1 class="text-2xl font-black text-slate-800 mt-2">Permohonan Surat Pengantar</h1>
+        <p class="text-sm text-slate-500">
+            Surat pengantar digital resmi yang ditandatangani oleh Ketua RT dan Ketua RW dengan barcode QR autentikasi.
+        </p>
+    </div>
+
+    <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Pilih Warga Pemohon *
+                </label>
+                <select name="pemohon_warga_id" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">-- Pilih Nama Warga --</option>
+                    {% for w in warga_list %}
+                        <option value="{{ w.id }}" {% if warga_list.count == 1 %}selected{% endif %}>{{ w.nama_lengkap }} ({{ w.nik_masked }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Kategori Layanan Surat *
+                </label>
+                <select name="kategori_layanan" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm bg-white outline-none focus:ring-2 focus:ring-brand-500">
+                    {% for val, label in kategori_choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Keperluan / Keterangan Spesifik *
+                </label>
+                <textarea name="keperluan" required rows="3"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm outline-none focus:ring-2 focus:ring-brand-500"
+                    placeholder="Contoh: Persyaratan pembuatan SKCK di Polsek untuk melamar pekerjaan di PT Kereta Api Indonesia"></textarea>
+            </div>
+
+            <div class="pt-4 flex items-center justify-end space-x-3">
+                <a href="{% url 'portal:surat_list' %}" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-sm hover:bg-slate-50 transition">
+                    Batal
+                </a>
+                <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow transition">
+                    Kirim Permohonan Surat
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

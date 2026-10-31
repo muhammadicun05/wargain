@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}Mading & Pusat Informasi — WargaIn{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action Row -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-brand-700">
+                <span>📍 {{ rw.nama }}{% if rt %} &rsaquo; {{ rt.nama }}{% endif %}</span>
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 mt-1">Mading Digital Lingkungan</h1>
+            <p class="text-sm text-slate-500">Pusat informasi resmi pengurus RT/RW dan warta komunikasi warga</p>
+        </div>
+
+        <a href="{% url 'portal:mading_create' %}" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+            <span>+</span>
+            <span>{% if is_officer %}Buat Pengumuman Baru{% else %}Kirim Warta Warga{% endif %}</span>
+        </a>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 text-xs overflow-x-auto">
+        <a href="{% url 'portal:mading_list' %}" class="px-3.5 py-2 rounded-xl font-bold transition {% if tab == 'terbit' and not kategori_filter %}bg-slate-800 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            Semua Terbit
+        </a>
+        <a href="{% url 'portal:mading_list' %}?kategori=AGENDA" class="px-3.5 py-2 rounded-xl font-bold transition {% if kategori_filter == 'AGENDA' %}bg-blue-600 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            📅 Agenda Kegiatan
+        </a>
+        <a href="{% url 'portal:mading_list' %}?kategori=GENTING" class="px-3.5 py-2 rounded-xl font-bold transition {% if kategori_filter == 'GENTING' %}bg-rose-600 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            🔴 Genting / Peringatan
+        </a>
+        <a href="{% url 'portal:mading_list' %}?kategori=KABAR_WARGA" class="px-3.5 py-2 rounded-xl font-bold transition {% if kategori_filter == 'KABAR_WARGA' %}bg-amber-600 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            🤝 Warta Warga
+        </a>
+
+        {% if is_officer %}
+        <a href="{% url 'portal:mading_list' %}?tab=konfirmasi" class="px-3.5 py-2 rounded-xl font-bold transition flex items-center space-x-1.5 {% if tab == 'konfirmasi' or tab == 'moderasi' %}bg-purple-600 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            <span>🛡️ Menunggu Konfirmasi</span>
+            {% if pending_konfirmasi_count > 0 %}
+                <span class="px-1.5 py-0.2 bg-rose-500 text-white rounded-full text-[10px] font-black">{{ pending_konfirmasi_count }}</span>
+            {% endif %}
+        </a>
+        {% endif %}
+
+        <a href="{% url 'portal:mading_list' %}?tab=arsip" class="px-3.5 py-2 rounded-xl font-bold transition {% if tab == 'arsip' %}bg-slate-800 text-white shadow-sm{% else %}bg-white text-slate-600 hover:bg-slate-100 border border-slate-200{% endif %}">
+            📁 Arsip Lalu
+        </a>
+    </div>
+
+    <!-- Search Bar -->
+    <form method="GET" class="relative max-w-md">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        {% if kategori_filter %}
+            <input type="hidden" name="kategori" value="{{ kategori_filter }}">
+        {% endif %}
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                🔍
+            </span>
+            <input type="text" name="q" value="{{ search }}" placeholder="Cari judul warta, kata kunci, agenda..."
+                class="w-full pl-9 pr-20 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none text-xs bg-white shadow-sm">
+            {% if search %}
+                <a href="{% url 'portal:mading_list' %}?tab={{ tab }}" class="absolute inset-y-0 right-16 pr-2 flex items-center text-xs text-slate-400 hover:text-slate-600">
+                    &times; Batal
+                </a>
+            {% endif %}
+            <button type="submit" class="absolute inset-y-1 right-1 px-3 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-lg transition">
+                Cari
+            </button>
+        </div>
+    </form>
+
+    <!-- Mading Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for p in pengumuman_list %}
+        <div class="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between {% if p.kategori == 'GENTING' %}ring-2 ring-rose-400/60{% elif p.is_pinned %}ring-2 ring-amber-400/60{% endif %}">
+            
+            <div class="p-5">
+                <!-- Badges Row -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                        <!-- Category Badge -->
+                        {% if p.kategori == 'GENTING' %}
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200">
+                                🔴 Genting
+                            </span>
+                        {% elif p.kategori == 'AGENDA' %}
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-200">
+                                📅 Agenda
+                            </span>
+                        {% elif p.kategori == 'RESMI' %}
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                📢 Resmi RT/RW
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                                🤝 Warta Warga
+                            </span>
+                        {% endif %}
+
+                        <!-- Scope Badge -->
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600">
+                            {{ p.wilayah_node.nama }}
+                        </span>
+
+                        {% if p.is_pinned %}
+                            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                📌 Disematkan
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <span class="text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                        {{ p.created_at|date:"d M Y" }}
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-base font-bold text-slate-800 hover:text-brand-700 leading-snug mb-2">
+                    <a href="{% url 'portal:mading_detail' p.id %}">
+                        {{ p.judul }}
+                    </a>
+                </h3>
+
+                <!-- Agenda Highlights (if any) -->
+                {% if p.tanggal_kegiatan or p.lokasi_kegiatan %}
+                <div class="mb-3 p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-xs space-y-1">
+                    {% if p.tanggal_kegiatan %}
+                    <div class="flex items-center space-x-1.5 text-blue-900 font-semibold">
+                        <span>🗓️</span>
+                        <span>{{ p.tanggal_kegiatan|date:"l, d F Y &bull; H:i" }} WIB</span>
+                    </div>
+                    {% endif %}
+                    {% if p.lokasi_kegiatan %}
+                    <div class="flex items-center space-x-1.5 text-blue-800">
+                        <span>📍</span>
+                        <span>{{ p.lokasi_kegiatan }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Content Excerpt -->
+                <p class="text-xs text-slate-600 leading-relaxed line-clamp-3">
+                    {{ p.isi|linebreaksbr }}
+                </p>
+            </div>
+
+            <!-- Card Bottom Bar -->
+            <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                <div class="text-[11px] text-slate-400 truncate max-w-[150px]">
+                    Oleh: <strong class="text-slate-600 font-medium">{{ p.penulis.first_name|default:p.penulis.username }}</strong>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    {% if tab == 'konfirmasi' or tab == 'moderasi' and is_officer %}
+                        <!-- Confirmation Action Buttons -->
+                        <form method="POST" action="{% url 'portal:mading_konfirmasi' p.id %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition shadow-sm">
+                                ✓ Konfirmasi
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'portal:mading_konfirmasi' p.id %}" class="inline" onsubmit="return confirm('Tolak warta ini?');">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold rounded-lg border border-rose-200 transition">
+                                Tolak
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'portal:mading_detail' p.id %}" class="font-bold text-brand-700 hover:text-brand-800 transition">
+                            Baca Detail &rarr;
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="col-span-1 md:col-span-2 lg:col-span-3 py-16 text-center bg-white rounded-3xl border border-dashed border-slate-300">
+            <span class="text-4xl">📰</span>
+            <h3 class="text-base font-bold text-slate-700 mt-2">Belum ada pengumuman</h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                {% if tab == 'konfirmasi' or tab == 'moderasi' %}
+                    Tidak ada warta warga yang sedang menunggu konfirmasi pengurus.
+                {% else %}
+                    Belum ada pengumuman yang sesuai dengan filter atau kata kunci pencarian Anda.
+                {% endif %}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Surat Pengantar No. {{ surat.nomor_surat }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 20mm 20mm 20mm;
+        }
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            color: #000;
+            line-height: 1.4;
+            font-size: 12pt;
+            background: #f8fafc;
+            padding: 20px;
+        }
+        .sheet {
+            background: #fff;
+            max-width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            padding: 25mm 20mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            position: relative;
+        }
+        .header-kop {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .header-kop h2 {
+            margin: 0;
+            font-size: 14pt;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .header-kop h3 {
+            margin: 2px 0;
+            font-size: 13pt;
+            text-transform: uppercase;
+        }
+        .header-kop p {
+            margin: 0;
+            font-size: 10pt;
+            font-style: italic;
+        }
+        .title-surat {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .title-surat h1 {
+            margin: 0;
+            font-size: 14pt;
+            text-decoration: underline;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .title-surat p {
+            margin: 2px 0 0 0;
+            font-size: 11pt;
+        }
+        .content-table {
+            width: 100%;
+            margin: 15px 0;
+            border-collapse: collapse;
+        }
+        .content-table td {
+            padding: 4px 0;
+            vertical-align: top;
+        }
+        .content-table td.label {
+            width: 220px;
+        }
+        .content-table td.colon {
+            width: 15px;
+        }
+        .signatures {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+        .sig-block {
+            width: 200px;
+        }
+        .sig-space {
+            height: 70px;
+        }
+        .qr-section {
+            text-align: center;
+            width: 150px;
+            margin: 0 auto;
+        }
+        .qr-section img {
+            width: 90px;
+            height: 90px;
+        }
+        .qr-section p {
+            font-size: 8pt;
+            margin: 4px 0 0 0;
+            color: #475569;
+        }
+        .no-print-bar {
+            max-width: 210mm;
+            margin: 0 auto 15px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .sheet {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                min-height: auto;
+            }
+            .no-print-bar {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Non-print Toolbar -->
+    <div class="no-print-bar">
+        <div>
+            <strong>Surat Pengantar RT/RW</strong>
+        </div>
+        <div>
+            <button onclick="window.print()" style="padding: 8px 16px; background: #059669; color: #fff; font-weight: bold; border: none; border-radius: 6px; cursor: pointer;">
+                🖨️ Cetak ke PDF / Printer
+            </button>
+        </div>
+    </div>
+
+    <div class="sheet">
+        <!-- KOP SURAT RESMI -->
+        <div class="header-kop">
+            <h2>RUKUN TETANGGA {{ surat.rt.nama|upper }} / RUKUN WARGA {{ surat.rw.nama|upper }}</h2>
+            <h3>KELURAHAN SUKALUYU KECAMATAN CIBEUNYING KALER</h3>
+            <h3>KOTA BANDUNG — PROVINSI JAWA BARAT</h3>
+            <p>Alamat Sekretariat: Jl. Jalaprang No. 1 Sukaluyu, Kota Bandung 40123</p>
+        </div>
+
+        <!-- JUDUL & NOMOR SURAT -->
+        <div class="title-surat">
+            <h1>SURAT PENGANTAR</h1>
+            <p>Nomor: {{ surat.nomor_surat }}</p>
+        </div>
+
+        <p style="text-indent: 40px; margin-bottom: 12px; text-align: justify;">
+            Yang bertanda tangan di bawah ini Pengurus Rukun Tetangga {{ surat.rt.nama }} dan Rukun Warga {{ surat.rw.nama }} Kelurahan Sukaluyu, Kecamatan Cibeunying Kaler, Kota Bandung, dengan ini menerangkan bahwa:
+        </p>
+
+        <!-- DATA IDENTITAS PEMOHON -->
+        <table class="content-table">
+            <tr>
+                <td class="label">1. Nama Lengkap</td>
+                <td class="colon">:</td>
+                <td><strong>{{ surat.pemohon_warga.nama_lengkap|upper }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label">2. NIK (Nomor Induk Kependudukan)</td>
+                <td class="colon">:</td>
+                <td><strong>{{ surat.pemohon_warga.nik_masked }}</strong></td>
+            </tr>
+            <tr>
+                <td class="label">3. Tempat, Tanggal Lahir</td>
+                <td class="colon">:</td>
+                <td>{{ surat.pemohon_warga.tempat_lahir }}, {{ surat.pemohon_warga.tanggal_lahir|date:"d F Y" }}</td>
+            </tr>
+            <tr>
+                <td class="label">4. Jenis Kelamin</td>
+                <td class="colon">:</td>
+                <td>{{ surat.pemohon_warga.get_jenis_kelamin_display }}</td>
+            </tr>
+            <tr>
+                <td class="label">5. Agama</td>
+                <td class="colon">:</td>
+                <td>{{ surat.pemohon_warga.get_agama_display }}</td>
+            </tr>
+            <tr>
+                <td class="label">6. Status Perkawinan</td>
+                <td class="colon">:</td>
+                <td>{{ surat.pemohon_warga.get_status_perkawinan_display }}</td>
+            </tr>
+            <tr>
+                <td class="label">7. Pekerjaan</td>
+                <td class="colon">:</td>
+                <td>{{ surat.pemohon_warga.pekerjaan|default:"Wiraswasta" }}</td>
+            </tr>
+            <tr>
+                <td class="label">8. Alamat Domisili Fisik</td>
+                <td class="colon">:</td>
+                <td>
+                    {% with dom=surat.pemohon_warga.riwayat_domisili.all|first %}
+                        {% if dom %}
+                            {{ dom.hunian.alamat_lengkap }}, {{ surat.rt.nama }} {{ surat.rw.nama }}
+                        {% else %}
+                            Sukaluyu, {{ surat.rt.nama }} {{ surat.rw.nama }}
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            </tr>
+        </table>
+
+        <!-- PERNYATAAN & KEPERLUAN -->
+        <p style="text-indent: 40px; margin: 15px 0 10px 0; text-align: justify;">
+            Orang tersebut di atas adalah benar-benar warga yang bertempat tinggal di lingkungan kami dan berkelakuan baik. Surat pengantar ini diberikan untuk keperluan:
+        </p>
+
+        <div style="margin: 10px 0 20px 40px; padding: 10px 15px; border-left: 3px solid #000; font-weight: bold; background: #fafafa;">
+            "{{ surat.keperluan }}"
+        </div>
+
+        <p style="text-indent: 40px; margin-bottom: 25px; text-align: justify;">
+            Demikian Surat Pengantar ini dibuat dengan sebenar-benarnya untuk dipergunakan sebagaimana mestinya, dan berlaku sampai dengan tanggal <strong>{{ surat.berlaku_sampai|date:"d F Y"|default:"30 hari setelah terbit" }}</strong>.
+        </p>
+
+        <!-- TANGGAL DAN TANDA TANGAN BERSAMA -->
+        <div style="text-align: right; margin-bottom: 10px;">
+            Bandung, {{ surat.diterbitkan_pada|date:"d F Y"|default:"31 Oktober 2026" }}
+        </div>
+
+        <div class="signatures">
+            <div class="sig-block">
+                Mengetahui,<br>
+                <strong>Ketua RT {{ surat.rt.nama }}</strong>
+                <div class="sig-space"></div>
+                <strong>( ......................................... )</strong>
+            </div>
+
+            <!-- DIGITAL VERIFICATION QR CODE EMBEDDED -->
+            <div class="qr-section">
+                <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code Autentikasi Dokumen">
+                <p>Pindai untuk Verifikasi<br>Keaslian Dokumen</p>
+                <p style="font-family: monospace; font-size: 6pt;">{{ surat.verification_token|slice:":16" }}...</p>
+            </div>
+
+            <div class="sig-block">
+                Menyetujui,<br>
+                <strong>Ketua RW {{ surat.rw.nama }}</strong>
+                <div class="sig-space"></div>
+                <strong>( ......................................... )</strong>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

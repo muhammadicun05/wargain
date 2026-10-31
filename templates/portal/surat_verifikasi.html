@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Keaslian Surat — WargaIn v2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-slate-100 min-h-screen py-10 px-4 flex items-center justify-center">
+
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
+        <!-- Brand Header -->
+        <div class="bg-slate-900 text-white p-6 text-center">
+            <div class="w-12 h-12 bg-emerald-500 text-slate-950 font-black text-2xl rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-inner">
+                W
+            </div>
+            <h1 class="text-lg font-bold">Verifikasi Surat Pengantar</h1>
+            <p class="text-xs text-slate-400">Rukun Tetangga &amp; Rukun Warga</p>
+        </div>
+
+        <div class="p-6">
+            {% if is_valid %}
+                <!-- VALID DOCUMENT CARD -->
+                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center mb-6">
+                    <div class="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl font-black shadow-lg shadow-emerald-500/30 mb-2">
+                        ✓
+                    </div>
+                    <h2 class="text-base font-extrabold text-emerald-950 uppercase tracking-wide">
+                        Dokumen Asli & Terverifikasi
+                    </h2>
+                    <p class="text-xs text-emerald-700 mt-0.5">
+                        Diterbitkan resmi oleh Rukun Tetangga & Rukun Warga
+                    </p>
+                </div>
+
+                <!-- METADATA SHEET -->
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Nomor Surat</span>
+                        <span class="font-mono font-bold text-slate-800">{{ surat.nomor_surat }}</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Nama Pemohon</span>
+                        <span class="font-bold text-slate-800">{{ pemohon.nama_lengkap }}</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">NIK Pemohon</span>
+                        <span class="font-mono text-slate-600">{{ pemohon.nik_masked }}</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Asal Wilayah</span>
+                        <span class="font-semibold text-slate-700">{{ surat.rt.nama }} / {{ surat.rw.nama }}, Kel. Sukaluyu</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Jenis Dokumen</span>
+                        <span class="font-semibold text-emerald-800">{{ surat.get_kategori_layanan_display }}</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Tanggal Terbit</span>
+                        <span class="font-semibold text-slate-700">{{ surat.diterbitkan_pada|date:"d F Y H:i" }} WIB</span>
+                    </div>
+
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-slate-400">Masa Berlaku s/d</span>
+                        <span class="font-bold text-slate-800">{{ surat.berlaku_sampai|date:"d F Y" }}</span>
+                    </div>
+
+                    <div class="pt-2">
+                        <span class="text-slate-400 block mb-1">Keperluan Tercatat:</span>
+                        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-medium leading-relaxed">
+                            "{{ surat.keperluan }}"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t text-center text-[10px] text-slate-400">
+                    Pemeriksaan ini tercatat pada log keamanan sistem secara permanen.
+                </div>
+
+            {% else %}
+                <!-- INVALID OR EXPIRED CARD -->
+                <div class="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center">
+                    <div class="w-14 h-14 bg-rose-500 text-white rounded-full flex items-center justify-center mx-auto text-2xl font-black shadow-lg shadow-rose-500/30 mb-2">
+                        ✕
+                    </div>
+                    <h2 class="text-base font-extrabold text-rose-950 uppercase tracking-wide">
+                        Dokumen Tidak Valid / Kadaluwarsa
+                    </h2>
+                    <p class="text-xs text-rose-700 mt-2 leading-relaxed">
+                        Surat tidak terdaftar pada basis data WargaIn atau masa berlakunya telah habis. Harap konfirmasikan ke pengurus RT/RW terkait.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</body>
+</html>

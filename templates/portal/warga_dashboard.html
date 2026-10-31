@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Portal Layanan Warga — WargaIn{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Resident Greeting & Dwelling Card -->
+    <div class="bg-gradient-to-r from-brand-800 to-brand-900 rounded-3xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center space-x-2 px-3 py-1 bg-white/10 rounded-full text-xs font-semibold text-emerald-200 border border-white/20 mb-3">
+                    <span>🏡 {{ hunian.nomor_rumah|default:"Tempat Tinggal Warga" }}</span>
+                    <span>&bull; {{ hunian.rt.nama|default:"RT 01" }} / {{ hunian.rt.parent.nama|default:"RW 07" }}</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
+                    Halo, {{ warga.nama_lengkap|default:request.user.first_name|default:request.user.username }}!
+                </h1>
+                <p class="text-xs sm:text-sm text-emerald-100 mt-1 max-w-xl leading-relaxed">
+                    Selamat datang di Portal Warga. Di sini Anda dapat memantau status iuran rumah tangga, data keluarga, dan mengajukan surat pengantar resmi.
+                </p>
+            </div>
+
+            <!-- Quick Action Button -->
+            <div class="flex flex-col sm:flex-row gap-2">
+                <a href="{% url 'portal:surat_create' %}" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-brand-950 font-bold text-sm rounded-2xl shadow-lg transition flex items-center justify-center space-x-2 text-center">
+                    <span>📝</span>
+                    <span>Ajukan Surat Pengantar</span>
+                </a>
+                <a href="{% url 'portal:iuran_saya' %}" class="px-5 py-3 bg-white/15 hover:bg-white/20 text-white font-bold text-sm rounded-2xl border border-white/20 transition flex items-center justify-center space-x-2 text-center">
+                    <span>💳</span>
+                    <span>Status Iuran Rumah</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENTING / EMERGENCY ALERT BANNER -->
+    {% if pengumuman_genting %}
+    <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <span class="text-2xl animate-bounce">🔴</span>
+            <div>
+                <div class="text-[10px] font-black uppercase tracking-wider text-rose-700">Peringatan Genting Lingkungan</div>
+                <h3 class="text-sm font-bold text-rose-900">{{ pengumuman_genting.judul }}</h3>
+                <p class="text-xs text-rose-700 mt-0.5 max-w-2xl">{{ pengumuman_genting.isi|truncatechars:180 }}</p>
+            </div>
+        </div>
+        <a href="{% url 'portal:mading_detail' pengumuman_genting.id %}" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow transition whitespace-nowrap">
+            Baca Lengkap &rarr;
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 2 Column Layout: Dues Status & Family Members -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Dues & Billing Snapshot (Col span 1) -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    <span>Kas & Iuran Hunian</span>
+                    <span class="text-base">💰</span>
+                </div>
+                <h3 class="text-lg font-black text-slate-800">Bulan {{ curr_month_label }}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">{{ hunian.nomor_rumah }} &bull; {{ hunian.alamat_lengkap|truncatechars:35 }}</p>
+
+                <!-- Billing status list -->
+                <div class="mt-4 space-y-2.5">
+                    {% for tagihan in tagihan_list %}
+                    <div class="p-3 rounded-2xl border flex items-center justify-between text-xs {% if tagihan.status_pembayaran == 'LUNAS' %}bg-emerald-50/60 border-emerald-200{% else %}bg-amber-50/60 border-amber-200{% endif %}">
+                        <div>
+                            <div class="font-bold text-slate-800">{{ tagihan.pos_iuran.nama_pos }}</div>
+                            <div class="text-[11px] text-slate-500">Rp {{ tagihan.jumlah_tagihan|floatformat:0 }}</div>
+                        </div>
+                        <div>
+                            {% if tagihan.status_pembayaran == 'LUNAS' %}
+                                {% with p=tagihan.pembayaran_list.first %}
+                                    {% if p %}
+                                    <a href="{% url 'portal:kuitansi' p.nomor_kuitansi %}" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition inline-block">
+                                        ✓ Lunas &bull; Kuitansi
+                                    </a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <span class="px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-[10px] font-bold">
+                                    Belum Bayar
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-400 italic py-3">Tidak ada tagihan iuran bulan ini.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t text-right">
+                <a href="{% url 'portal:iuran_saya' %}" class="text-xs font-bold text-brand-600 hover:text-brand-700 transition">
+                    Lihat Seluruh Riwayat Kas &rarr;
+                </a>
+            </div>
+        </div>
+
+        <!-- Family Card & Household Members (Col span 2) -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+                    <span>Data Kartu Keluarga & Penghuni Rumah</span>
+                    <span class="text-base">👨‍👩‍👧‍👦</span>
+                </div>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3 mb-4">
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800">
+                            {% if kk %}No. KK: {{ kk.nomor_kk_masked }}{% else %}Data Penghuni Rumah{% endif %}
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Peran Anda: <strong class="text-brand-700">{{ domisili.get_peran_di_hunian_display|default:"Warga" }}</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {% for m in family_members %}
+                    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-xl">
+                                {% if m.warga.jenis_kelamin == 'L' %}👨{% else %}👩{% endif %}
+                            </span>
+                            <div>
+                                <div class="font-bold text-slate-800">{{ m.warga.nama_lengkap }}</div>
+                                <div class="text-[11px] text-slate-400 font-mono">{{ m.warga.nik_masked }}</div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-700 border border-slate-200">
+                            {{ m.get_status_hubungan_display }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-2 p-4 bg-slate-50 rounded-2xl text-xs text-slate-500 text-center">
+                        Terdata sebagai penghuni di {{ hunian.nomor_rumah|default:"lingkungan RT 01" }}.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t text-xs text-slate-400 flex items-center justify-between">
+                <span>Perubahan data keluarga dapat dilaporkan kepada Ketua RT setempat.</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Mading Lingkungan Widget untuk Warga -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-slate-800">Warta &amp; Mading Lingkungan Warga</h3>
+                <p class="text-xs text-slate-500">Kabar kegiatan, edaran RT/RW, dan agenda bersama</p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'portal:mading_create' %}" class="px-3.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-xl text-xs transition">
+                    + Kirim Warta
+                </a>
+                <a href="{% url 'portal:mading_list' %}" class="text-xs font-bold text-brand-600 hover:text-brand-700">
+                    Buka Mading Lengkap &rarr;
+                </a>
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for m in mading_terbaru %}
+            <div class="p-4 rounded-2xl border border-slate-200/80 hover:border-brand-300 hover:shadow-sm bg-slate-50/50 hover:bg-white transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {% if m.kategori == 'GENTING' %}bg-rose-100 text-rose-800{% elif m.kategori == 'AGENDA' %}bg-blue-100 text-blue-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                            {{ m.get_kategori_display }}
+                        </span>
+                        <span class="text-[10px] text-slate-400">{{ m.created_at|date:"d M Y" }}</span>
+                    </div>
+                    <h4 class="text-xs font-bold text-slate-800 line-clamp-2 hover:text-brand-700">
+                        <a href="{% url 'portal:mading_detail' m.id %}">{{ m.judul }}</a>
+                    </h4>
+                    <p class="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                        {{ m.isi }}
+                    </p>
+                </div>
+                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-400 font-medium">{{ m.wilayah_node.nama }}</span>
+                    <a href="{% url 'portal:mading_detail' m.id %}" class="font-bold text-brand-700 hover:text-brand-800">
+                        Baca Selengkapnya &rarr;
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-3 py-6 text-center text-slate-400 text-xs">
+                Belum ada pengumuman baru. Ada info lingkungan? Klik <strong>+ Kirim Warta</strong> untuk membagikan informasi ke pengurus RT.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- My Letters Table Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-slate-800">Riwayat Pengajuan Surat Pengantar Saya</h3>
+                <p class="text-xs text-slate-500">Surat pengantar resmi yang dapat diunduh atau diverifikasi via QR Code</p>
+            </div>
+            <a href="{% url 'portal:surat_create' %}" class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                + Ajukan Baru
+            </a>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                        <th class="py-3 px-4">No. Surat</th>
+                        <th class="py-3 px-4">Kategori Layanan</th>
+                        <th class="py-3 px-4">Keperluan</th>
+                        <th class="py-3 px-4">Status Pengajuan</th>
+                        <th class="py-3 px-4 text-right">Dokumen Digital</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for s in surat_saya %}
+                    <tr class="hover:bg-slate-50/80 transition text-xs">
+                        <td class="py-3.5 px-4 font-mono font-bold text-slate-800">{{ s.nomor_surat }}</td>
+                        <td class="py-3.5 px-4 font-semibold text-brand-800">{{ s.get_kategori_layanan_display }}</td>
+                        <td class="py-3.5 px-4 text-slate-600 max-w-xs truncate">{{ s.keperluan }}</td>
+                        <td class="py-3.5 px-4">
+                            {% if s.status_surat == 'DISETUJUI_RW' %}
+                                <span class="px-2.5 py-0.5 font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px]">
+                                    ✓ Resmi Terbit & Aktif
+                                </span>
+                            {% elif s.status_surat == 'DISETUJUI_RT' %}
+                                <span class="px-2.5 py-0.5 font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px]">
+                                    Menunggu Pengesahan RW
+                                </span>
+                            {% elif s.status_surat == 'DITOLAK' %}
+                                <span class="px-2.5 py-0.5 font-bold bg-rose-50 text-rose-700 border border-rose-200 rounded-full text-[10px]">
+                                    Ditolak: {{ s.catatan_penolakan|default:"Periksa kembali data" }}
+                                </span>
+                            {% else %}
+                                <span class="px-2.5 py-0.5 font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px]">
+                                    Menunggu Persetujuan RT
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right space-x-1.5">
+                            {% if s.status_surat == 'DISETUJUI_RW' %}
+                                <a href="{% url 'portal:surat_print' s.id %}" target="_blank"
+                                    class="px-3 py-1 font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition shadow-sm inline-block">
+                                    🖨️ Cetak / Unduh
+                                </a>
+                                <a href="{% url 'portal:verifikasi_surat' s.verification_token %}" target="_blank"
+                                    class="px-2.5 py-1 font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg transition inline-block">
+                                    🔍 QR
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 italic">Sedang Diproses</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400 text-xs">
+                            Belum ada permohonan surat pengantar. Klik tombol <strong>+ Ajukan Baru</strong> di atas untuk membuat surat pengantar.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

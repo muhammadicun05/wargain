@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+
+{% block title %}Pendaftaran Akun Warga — WargaIn v2{% endblock %}
+
+{% block header %}{% endblock %}
+{% block messages %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block main_wrapper %}
+<main class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-slate-100/90 antialiased selection:bg-emerald-500 selection:text-white py-10">
+    <!-- Main 2-Column Responsive Card -->
+    <div class="w-full max-w-4xl lg:max-w-5xl bg-white rounded-3xl shadow-2xl shadow-slate-300/60 overflow-hidden border border-slate-200/80 grid grid-cols-1 md:grid-cols-12 min-h-[680px]">
+        
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: Deep Forest Green Hero Banner -->
+        <!-- ========================================== -->
+        <div class="md:col-span-5 bg-gradient-to-br from-[#064e3b] via-[#043e2e] to-[#022c22] p-8 lg:p-10 text-white flex flex-col justify-between relative overflow-hidden">
+            <!-- Decorative Ambient Glows -->
+            <div class="absolute -top-24 -left-24 w-72 h-72 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -right-24 w-72 h-72 bg-teal-400/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <!-- Top Brand Section -->
+            <div class="relative z-10 flex items-center justify-between">
+                <a href="{% url 'portal:login' %}" class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-950/40 border border-emerald-300/30">
+                        <span class="text-2xl font-black tracking-tight text-white">W</span>
+                    </div>
+                    <div class="leading-none">
+                        <span class="text-2xl font-extrabold tracking-tight text-white">Warga<span class="text-emerald-300">In</span></span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Middle Value Propositions -->
+            <div class="relative z-10 my-8 space-y-6">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-snug">
+                        Daftar Akun Warga Mandiri
+                    </h2>
+                    <p class="text-emerald-100/80 text-sm mt-2.5 leading-relaxed">
+                        Akses layanan surat pengantar, pantau iuran kas RT, dan baca kabar mading lingkungan secara digital langsung dari ponsel Anda.
+                    </p>
+                </div>
+
+                <!-- 3 Key Highlights -->
+                <div class="space-y-4 pt-2">
+                    <div class="flex items-start space-x-3.5">
+                        <div class="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 flex items-center justify-center text-emerald-300 flex-shrink-0 mt-0.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white text-sm">Verifikasi Cerdas & Instan</p>
+                            <p class="text-emerald-200/75 text-xs mt-0.5">Jika NIK Anda sudah terdata di buku RT, akun Anda langsung aktif tanpa menunggu.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-3.5">
+                        <div class="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 flex items-center justify-center text-emerald-300 flex-shrink-0 mt-0.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white text-sm">Konfirmasi Demi Keamanan</p>
+                            <p class="text-emerald-200/75 text-xs mt-0.5">Warga baru yang belum terdaftar akan dikonfirmasi oleh Ketua RT terlebih dahulu.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-3.5">
+                        <div class="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 flex items-center justify-center text-emerald-300 flex-shrink-0 mt-0.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-white text-sm">Standar Privasi UU PDP</p>
+                            <p class="text-emerald-200/75 text-xs mt-0.5">Data identitas NIK terlindungi dengan enkripsi AES-256 militer.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Left -->
+            <div class="relative z-10 pt-6 border-t border-emerald-800/60 text-xs text-emerald-200/60">
+                <span>WargaIn Developed by Zyntaxera</span>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: Registration Form            -->
+        <!-- ========================================== -->
+        <div class="md:col-span-7 bg-white p-8 sm:p-10 lg:p-12 flex flex-col justify-between">
+            <div>
+                <!-- Heading -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between">
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                            Buat Akun Warga
+                        </h1>
+                        <a href="{% url 'portal:login' %}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700">
+                            &larr; Sudah ada akun?
+                        </a>
+                    </div>
+                    <p class="text-slate-500 text-sm mt-1.5">
+                        Isi formulir pendaftaran di bawah ini secara lengkap dan benar.
+                    </p>
+                </div>
+
+                <!-- Toast / Error Messages -->
+                {% if messages %}
+                <div class="mb-5 space-y-2">
+                    {% for message in messages %}
+                    <div class="p-3.5 rounded-xl border text-xs font-medium flex items-center justify-between {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %}">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-base">
+                                {% if message.tags == 'error' %}⚠️{% elif message.tags == 'warning' %}🔔{% else %}✅{% endif %}
+                            </span>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 font-bold ml-2">&times;</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Registration Form -->
+                <form method="POST" class="space-y-4" id="registerForm">
+                    {% csrf_token %}
+
+                    <!-- Row 1: Nama Lengkap & NIK -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="nama_lengkap" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Nama Lengkap (KTP) <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="nama_lengkap" id="nama_lengkap" required autofocus
+                                value="{{ form_data.nama_lengkap|default:'' }}"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="Contoh: Budi Santoso">
+                        </div>
+
+                        <div>
+                            <label for="nik" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                NIK 16 Digit <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="nik" id="nik" required maxlength="16" pattern="\d{16}"
+                                value="{{ form_data.nik|default:'' }}"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white font-mono"
+                                placeholder="3201xxxxxxxxxxxx">
+                        </div>
+                    </div>
+
+                    <!-- Row 2: RT & Nomor Rumah -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="rt_id" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Lingkungan RT <span class="text-rose-500">*</span>
+                            </label>
+                            <select name="rt_id" id="rt_id" required
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 bg-slate-50/50 hover:bg-white focus:bg-white transition">
+                                <option value="" disabled {% if not form_data.rt_id %}selected{% endif %}>-- Pilih RT --</option>
+                                {% for rt_item in rt_list %}
+                                <option value="{{ rt_item.id }}" {% if form_data.rt_id == rt_item.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ rt_item.nama }} ({{ rt_item.parent.nama }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="nomor_rumah" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Nomor Rumah / Hunian <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="nomor_rumah" id="nomor_rumah" required
+                                value="{{ form_data.nomor_rumah|default:'' }}"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="Contoh: No. 14A / Blok B2">
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Nomor WhatsApp & Username -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="nomor_wa" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                No. WhatsApp Aktif <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="tel" name="nomor_wa" id="nomor_wa" required
+                                value="{{ form_data.nomor_wa|default:'' }}"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="08123456789">
+                        </div>
+
+                        <div>
+                            <label for="username" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Nama Pengguna (Username) <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" name="username" id="username" required
+                                value="{{ form_data.username|default:'' }}"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="Contoh: budi_santoso">
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Password & Konfirmasi -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="password" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Kata Sandi <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="password" name="password" id="password" required minlength="6"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="Minimal 6 karakter">
+                        </div>
+
+                        <div>
+                            <label for="password_confirm" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Ulangi Kata Sandi <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="password" name="password_confirm" id="password_confirm" required minlength="6"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none text-sm text-slate-800 placeholder-slate-400 transition bg-slate-50/50 hover:bg-white focus:bg-white"
+                                placeholder="Ulangi kata sandi">
+                        </div>
+                    </div>
+
+                    <!-- Privacy Statement -->
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-start space-x-2.5">
+                        <span class="text-base flex-shrink-0">🔒</span>
+                        <p class="leading-relaxed">
+                            Dengan mendaftar, Anda menyatakan data yang diisikan adalah benar. NIK Anda akan dienkripsi dan hanya digunakan untuk keperluan administrasi lingkungan RT/RW Anda.
+                        </p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit"
+                        class="w-full py-3.5 px-4 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 shadow-lg shadow-emerald-600/25 transition duration-150 flex items-center justify-center space-x-2 group mt-2">
+                        <span>Daftar Akun Sekarang</span>
+                        <span class="transform group-hover:translate-x-1 transition-transform duration-150">&rarr;</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Bottom Link -->
+            <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                <p class="text-xs text-slate-500">
+                    Sudah pernah mendaftar? 
+                    <a href="{% url 'portal:login' %}" class="font-bold text-emerald-600 hover:text-emerald-700 hover:underline">
+                        Masuk ke Portal di sini
+                    </a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Kas & Iuran Rumah — WargaIn{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-4xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a href="{% url 'portal:dashboard' %}" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+                &larr; Kembali ke Dashboard
+            </a>
+            <h1 class="text-2xl font-black text-slate-800 mt-1">Status Kas & Iuran Rumah Tangga</h1>
+            <p class="text-sm text-slate-500">Unit: <strong class="text-slate-700">{{ hunian.nomor_rumah|default:"Rumah Warga" }}</strong> &bull; {{ hunian.alamat_lengkap }} ({{ hunian.rt.nama }})</p>
+        </div>
+    </div>
+
+    <!-- Active Bills Table -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100">
+            <h3 class="text-base font-bold text-slate-800">Daftar Tagihan Iuran Bulanan</h3>
+            <p class="text-xs text-slate-500">Iuran operasional kebersihan sampah lingkungan dan ronda malam</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                        <th class="py-3 px-4">Pos Pengeluaran</th>
+                        <th class="py-3 px-4">Bulan Periode</th>
+                        <th class="py-3 px-4">Jumlah</th>
+                        <th class="py-3 px-4">Jatuh Tempo</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Kuitansi / Bukti</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    {% for tagihan in tagihan_list %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3.5 px-4 font-bold text-slate-800">{{ tagihan.pos_iuran.nama_pos }}</td>
+                        <td class="py-3.5 px-4 font-mono font-semibold text-slate-600">{{ tagihan.periode_bulan }}</td>
+                        <td class="py-3.5 px-4 font-black text-slate-800">Rp {{ tagihan.jumlah_tagihan|floatformat:0 }}</td>
+                        <td class="py-3.5 px-4 text-slate-500">{{ tagihan.jatuh_tempo|date:"d M Y" }}</td>
+                        <td class="py-3.5 px-4">
+                            {% if tagihan.status_pembayaran == 'LUNAS' %}
+                                <span class="px-2.5 py-0.5 font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px]">
+                                    ✓ Lunas Terbayar
+                                </span>
+                            {% else %}
+                                <span class="px-2.5 py-0.5 font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px]">
+                                    Menunggu Pembayaran
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            {% with p=tagihan.pembayaran_list.first %}
+                                {% if p %}
+                                    <a href="{% url 'portal:kuitansi' p.nomor_kuitansi %}" class="px-3 py-1 font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-sm transition inline-block">
+                                        Buka Kuitansi Resmi &rarr;
+                                    </a>
+                                {% else %}
+                                    <span class="text-slate-400 italic">Dapat diserahkan ke Bendahara RT</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+                            Belum ada catatan tagihan iuran untuk rumah Anda.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

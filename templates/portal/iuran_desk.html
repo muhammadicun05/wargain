@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}Meja Kas & Iuran Warga — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Summary Banner -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div>
+            <div class="text-xs font-bold uppercase tracking-wider text-brand-700">Periode: {{ curr_month_label }}</div>
+            <h1 class="text-2xl font-black text-slate-800 mt-1">Meja Penerimaan Iuran RT / RW</h1>
+            <p class="text-sm text-slate-500">Pencatatan kas operasional kebersihan, sampah, dan ronda dengan kuitansi digital instan</p>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 px-5 py-3 rounded-2xl text-right">
+            <span class="text-xs font-bold text-emerald-800 uppercase block">Total Iuran Terkumpul:</span>
+            <span class="text-2xl font-black text-emerald-950">Rp {{ total_terkumpul|floatformat:0 }}</span>
+        </div>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex items-center space-x-2 text-xs">
+        <a href="{% url 'portal:iuran_desk' %}" class="px-3 py-1.5 rounded-xl font-bold transition {% if not status_filter %}bg-slate-800 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Semua Tagihan
+        </a>
+        <a href="{% url 'portal:iuran_desk' %}?status=BELUM_BAYAR" class="px-3 py-1.5 rounded-xl font-bold transition {% if status_filter == 'BELUM_BAYAR' %}bg-amber-600 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Belum Bayar
+        </a>
+        <a href="{% url 'portal:iuran_desk' %}?status=LUNAS" class="px-3 py-1.5 rounded-xl font-bold transition {% if status_filter == 'LUNAS' %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Sudah Lunas
+        </a>
+    </div>
+
+    <!-- Billing Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                        <th class="py-3 px-4">Hunian / Rumah</th>
+                        <th class="py-3 px-4">Pos Iuran</th>
+                        <th class="py-3 px-4">Bulan</th>
+                        <th class="py-3 px-4">Nominal Tagihan</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Tindakan Cepat</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for tagihan in tagihan_list %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-4">
+                            <div class="font-bold text-slate-800">{{ tagihan.hunian.nomor_rumah }}</div>
+                            <div class="text-[11px] text-slate-400">{{ tagihan.hunian.rt.nama }} &bull; {{ tagihan.hunian.alamat_lengkap|truncatechars:30 }}</div>
+                        </td>
+                        <td class="py-3 px-4 font-semibold text-slate-700 text-xs">
+                            {{ tagihan.pos_iuran.nama_pos }}
+                        </td>
+                        <td class="py-3 px-4 font-mono text-xs text-slate-600">
+                            {{ tagihan.periode_bulan }}
+                        </td>
+                        <td class="py-3 px-4 font-bold text-slate-800">
+                            Rp {{ tagihan.jumlah_tagihan|floatformat:0 }}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if tagihan.status_pembayaran == 'LUNAS' %}
+                                <span class="px-2.5 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                                    ✓ Lunas
+                                </span>
+                            {% else %}
+                                <span class="px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                                    Belum Lunas
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            {% if tagihan.status_pembayaran == 'LUNAS' %}
+                                {% with p=tagihan.pembayaran_list.first %}
+                                    {% if p %}
+                                        <a href="{% url 'portal:kuitansi' p.nomor_kuitansi %}" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition">
+                                            Lihat Kuitansi &rarr;
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                {% if is_treasurer %}
+                                <form method="POST" action="{% url 'portal:iuran_bayar' tagihan.id %}" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="metode_pembayaran" value="TUNAI">
+                                    <button type="submit" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                                        Terima Tunai Rp {{ tagihan.jumlah_tagihan|floatformat:0 }}
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-[11px] text-amber-700 font-medium bg-amber-50 px-2 py-1 rounded-lg border border-amber-200">
+                                    Menunggu Kasir Bendahara
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400 text-sm">
+                            Tidak ada data tagihan iuran pada periode ini.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

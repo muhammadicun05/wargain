@@ -1,0 +1,21 @@
+# Python & Virtualenv
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment & Secrets
+.env
+*.local
+
+# Django Static & Media
+staticfiles/
+media/
+db.sqlite3
+
+# System & IDE
+.vscode/
+.idea/
+.DS_Store
+*.log

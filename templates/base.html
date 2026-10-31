@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WargaIn v2 — Tata Kelola Warga Digital{% endblock %}</title>
+    <!-- Tailwind CSS CDN with configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+
+    <!-- Progressive Web App (PWA) Manifest & Meta Tags -->
+    <link rel="manifest" href="{% url 'portal:manifest' %}">
+    <meta name="theme-color" content="#064e3b">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="WargaIn">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="/static/icons/icon.svg">
+
+    <!-- Apple iOS Safari PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WargaIn">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="/static/icons/icon-192.png">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    {% block header %}
+    <header class="bg-brand-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'portal:dashboard' %}" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-inner">
+                            <span class="text-2xl font-black tracking-tight text-white">W</span>
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold tracking-tight text-white">Warga<span class="text-emerald-300">In</span></span>
+                        </div>
+                    </a>
+                </div>
+
+                {% if request.user.is_authenticated %}
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    {% if request.user.pengurus_profile.role == 'WARGA' %}
+                        <!-- Citizen Navigation -->
+                        <a href="{% url 'portal:dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if request.resolver_match.url_name == 'dashboard' %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Portal Warga
+                        </a>
+                        <a href="{% url 'portal:mading_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'mading' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Mading Warga
+                        </a>
+                        <a href="{% url 'portal:surat_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'surat' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Surat Pengantar Saya
+                        </a>
+                        <a href="{% url 'portal:iuran_saya' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'iuran' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Iuran Rumah Saya
+                        </a>
+                    {% else %}
+                        <!-- Officer Navigation -->
+                        <a href="{% url 'portal:dashboard' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if request.resolver_match.url_name == 'dashboard' %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Dashboard
+                        </a>
+                        <a href="{% url 'portal:mading_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'mading' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Mading Warga
+                        </a>
+                        <a href="{% url 'portal:warga_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'warga' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Data Warga
+                        </a>
+                        <a href="{% url 'portal:hunian_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'hunian' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Hunian & Kos
+                        </a>
+                        {% if request.user.pengurus_profile.role != 'BENDAHARA_RT' and request.user.pengurus_profile.role != 'BENDAHARA_RW' %}
+                        <a href="{% url 'portal:surat_list' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'surat' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            Surat Pengantar
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'portal:iuran_desk' %}" class="px-3 py-2 rounded-lg text-sm font-medium hover:bg-brand-700 transition {% if 'iuran' in request.path %}bg-brand-900 text-white font-semibold{% else %}text-emerald-100{% endif %}">
+                            {% if 'BENDAHARA' in request.user.pengurus_profile.role %}Meja Kas &amp; Iuran{% else %}Kas &amp; Iuran{% endif %}
+                        </a>
+                    {% endif %}
+                </nav>
+
+                <!-- User Profile & Logout -->
+                <div class="flex items-center space-x-3">
+                    <div class="text-right hidden sm:block">
+                        <div class="text-sm font-semibold text-white leading-tight">
+                            {{ request.user.first_name|default:request.user.username }}
+                        </div>
+                        <div class="text-xs text-emerald-200">
+                            {% if request.user.pengurus_profile %}
+                                {{ request.user.pengurus_profile.get_role_display }}
+                            {% elif request.user.is_superuser %}
+                                Administrator Utama
+                            {% else %}
+                                Warga
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="{% url 'portal:logout' %}" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 hover:bg-red-500/80 hover:text-white text-emerald-100 border border-white/20 transition">
+                        Keluar
+                    </a>
+                </div>
+                {% else %}
+                <a href="{% url 'portal:login' %}" class="px-4 py-2 rounded-lg text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-brand-950 transition shadow">
+                    Masuk Portal
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+    {% endblock %}
+
+    <!-- Alert / Toast Messages -->
+    {% block messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="p-4 mb-3 rounded-xl border flex items-center justify-between {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% elif message.tags == 'warning' %}bg-amber-50 border-amber-200 text-amber-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %}">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-xl">
+                            {% if message.tags == 'error' %}⚠️{% elif message.tags == 'warning' %}🔔{% else %}✅{% endif %}
+                        </span>
+                        <span class="text-sm font-medium">{{ message }}</span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 font-bold">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% endblock %}
+
+    <!-- Main Content Body -->
+    {% block main_wrapper %}
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
+        {% block content %}{% endblock %}
+    </main>
+    {% endblock %}
+
+    <!-- Mobile Bottom Navigation Bar -->
+    {% if request.user.is_authenticated %}
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2 px-2 shadow-lg z-50 flex justify-around">
+        {% if request.user.pengurus_profile.role == 'WARGA' %}
+            <a href="{% url 'portal:dashboard' %}" class="flex flex-col items-center text-[10px] font-medium {% if request.resolver_match.url_name == 'dashboard' %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">🏡</span>
+                <span>Portal</span>
+            </a>
+            <a href="{% url 'portal:mading_list' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'mading' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">📰</span>
+                <span>Mading</span>
+            </a>
+            <a href="{% url 'portal:surat_list' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'surat' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">📜</span>
+                <span>Surat</span>
+            </a>
+            <a href="{% url 'portal:iuran_saya' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'iuran' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">💳</span>
+                <span>Iuran</span>
+            </a>
+        {% else %}
+            <a href="{% url 'portal:dashboard' %}" class="flex flex-col items-center text-[10px] font-medium {% if request.resolver_match.url_name == 'dashboard' %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'portal:mading_list' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'mading' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">📰</span>
+                <span>Mading</span>
+            </a>
+            <a href="{% url 'portal:warga_list' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'warga' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">👥</span>
+                <span>Warga</span>
+            </a>
+            <a href="{% url 'portal:surat_list' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'surat' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">📜</span>
+                <span>Surat</span>
+            </a>
+            <a href="{% url 'portal:iuran_desk' %}" class="flex flex-col items-center text-[10px] font-medium {% if 'iuran' in request.path %}text-brand-600 font-bold{% else %}text-slate-500{% endif %}">
+                <span class="text-lg">💰</span>
+                <span>Kas</span>
+            </a>
+        {% endif %}
+    </nav>
+    <div class="h-16 md:hidden"></div>
+    {% endif %}
+
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="font-medium text-slate-700">WargaIn &copy; {% now "Y" %} &mdash; Developed by Zyntaxera</p>
+            <p class="mt-1 text-slate-400">Pencatatan kependudukan, layanan surat pengantar, dan iuran kas warga</p>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- PWA Install Prompt Banner (Android & iOS) -->
+    <div id="pwa-install-banner" class="hidden fixed bottom-16 md:bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-md bg-brand-900 text-white p-4 rounded-2xl shadow-2xl border border-emerald-500/40 z-50 transition-all duration-300">
+        <div class="flex items-start justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl flex-shrink-0 border border-white/20">
+                    📱
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Pasang Aplikasi WargaIn</h4>
+                    <p class="text-xs text-emerald-200/90 mt-0.5">Pasang di layar utama HP untuk akses cepat, ringan, dan notifikasi warga.</p>
+                </div>
+            </div>
+            <button onclick="dismissPwaBanner()" class="text-emerald-300 hover:text-white text-lg font-bold ml-2 leading-none">&times;</button>
+        </div>
+        <div class="mt-3 flex space-x-2">
+            <button id="pwa-install-btn" onclick="installPwa()" class="flex-1 py-2 px-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow">
+                Pasang Sekarang
+            </button>
+            <button onclick="dismissPwaBanner()" class="py-2 px-3 bg-white/10 hover:bg-white/20 text-emerald-200 text-xs font-medium rounded-xl transition">
+                Nanti Saja
+            </button>
+        </div>
+    </div>
+
+    <!-- iOS Install Helper Modal -->
+    <div id="ios-install-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🍏</span>
+                    <h3 class="font-bold text-slate-900 text-base">Pasang di iPhone / iPad</h3>
+                </div>
+                <button onclick="closeIosModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Untuk memasang aplikasi WargaIn di perangkat iOS Safari Anda:
+            </p>
+            <ol class="text-xs text-slate-700 space-y-2 list-decimal list-inside bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <li>Tekan tombol <strong>Bagikan (Share)</strong> <span class="font-mono text-emerald-600 font-bold">[⎋]</span> di bilah bawah Safari.</li>
+                <li>Gulir ke bawah lalu pilih menu <strong>"Tambahkan ke Layar Utama" (Add to Home Screen)</strong>.</li>
+                <li>Tekan <strong>"Tambah"</strong> di pojok kanan atas.</li>
+            </ol>
+            <button onclick="closeIosModal()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- PWA & Service Worker Registration Script -->
+    <script>
+        // 1. Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then((reg) => {
+                        console.log('WargaIn Service Worker registered successfully with scope:', reg.scope);
+                    })
+                    .catch((err) => {
+                        console.warn('WargaIn Service Worker registration failed:', err);
+                    });
+            });
+        }
+
+        // 2. Install Prompt Handling
+        let deferredPrompt = null;
+        const pwaBanner = document.getElementById('pwa-install-banner');
+        const iosModal = document.getElementById('ios-install-modal');
+
+        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const isDismissed = localStorage.getItem('wargain_pwa_dismissed') === 'true';
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (!isStandalone && !isDismissed && pwaBanner) {
+                pwaBanner.classList.remove('hidden');
+            }
+        });
+
+        if (isIos && !isStandalone && !isDismissed && pwaBanner) {
+            pwaBanner.classList.remove('hidden');
+        }
+
+        function installPwa() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Pengguna menerima instalasi PWA WargaIn');
+                    }
+                    deferredPrompt = null;
+                    if (pwaBanner) pwaBanner.classList.add('hidden');
+                });
+            } else if (isIos) {
+                if (iosModal) iosModal.classList.remove('hidden');
+            }
+        }
+
+        function dismissPwaBanner() {
+            if (pwaBanner) pwaBanner.classList.add('hidden');
+            localStorage.setItem('wargain_pwa_dismissed', 'true');
+        }
+
+        function closeIosModal() {
+            if (iosModal) iosModal.classList.add('hidden');
+            dismissPwaBanner();
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

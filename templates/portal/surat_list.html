@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Surat Pengantar RT/RW — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-800">Layanan Surat Pengantar RT/RW</h1>
+            <p class="text-sm text-slate-500">Penerbitan surat pengantar resmi dengan verifikasi QR Code terenkripsi</p>
+        </div>
+        <a href="{% url 'portal:surat_create' %}" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow transition flex items-center justify-center space-x-1">
+            <span>+</span> <span>Ajukan Surat Baru</span>
+        </a>
+    </div>
+
+    <!-- Status Filter Pills -->
+    <div class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+        <a href="{% url 'portal:surat_list' %}" class="px-3 py-1.5 rounded-xl font-bold transition {% if not status_filter %}bg-slate-800 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Semua Permohonan
+        </a>
+        <a href="{% url 'portal:surat_list' %}?status=PENGAJUAN" class="px-3 py-1.5 rounded-xl font-bold transition {% if status_filter == 'PENGAJUAN' %}bg-amber-600 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Menunggu RT
+        </a>
+        <a href="{% url 'portal:surat_list' %}?status=DISETUJUI_RT" class="px-3 py-1.5 rounded-xl font-bold transition {% if status_filter == 'DISETUJUI_RT' %}bg-blue-600 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Menunggu RW
+        </a>
+        <a href="{% url 'portal:surat_list' %}?status=DISETUJUI_RW" class="px-3 py-1.5 rounded-xl font-bold transition {% if status_filter == 'DISETUJUI_RW' %}bg-emerald-600 text-white{% else %}bg-white text-slate-600 border border-slate-200 hover:bg-slate-50{% endif %}">
+            Terbit & Aktif
+        </a>
+    </div>
+
+    <!-- Letters Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                        <th class="py-3 px-4">No. Surat</th>
+                        <th class="py-3 px-4">Nama Pemohon</th>
+                        <th class="py-3 px-4">Kategori Layanan</th>
+                        <th class="py-3 px-4">Keperluan</th>
+                        <th class="py-3 px-4">Status Alur</th>
+                        <th class="py-3 px-4 text-right">Tindakan / Cetak</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for s in surat_list %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-4 font-mono text-xs font-bold text-slate-800">
+                            {{ s.nomor_surat }}
+                        </td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">
+                            {{ s.pemohon_warga.nama_lengkap }}
+                            <div class="text-[11px] text-slate-400 font-normal">{{ s.rt.nama }} / {{ s.rw.nama }}</div>
+                        </td>
+                        <td class="py-3 px-4 text-xs font-semibold text-brand-800">
+                            {{ s.get_kategori_layanan_display }}
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-600 max-w-xs truncate">
+                            {{ s.keperluan }}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if s.status_surat == 'DISETUJUI_RW' %}
+                                <span class="px-2 py-0.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                                    Resmi Terbit
+                                </span>
+                            {% elif s.status_surat == 'DISETUJUI_RT' %}
+                                <span class="px-2 py-0.5 text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
+                                    Disetujui RT
+                                </span>
+                            {% elif s.status_surat == 'DITOLAK' %}
+                                <span class="px-2 py-0.5 text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 rounded-full">
+                                    Ditolak
+                                </span>
+                            {% else %}
+                                <span class="px-2 py-0.5 text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-full">
+                                    Pengajuan Baru
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <div class="flex items-center justify-end space-x-1.5">
+                                {% if s.status_surat == 'PENGAJUAN' %}
+                                    {% if is_rt_signer and s.rt == rt or request.user.is_superuser %}
+                                        <!-- RT Approval Button: Khusus Ketua/Sekretaris RT terkait -->
+                                        <form method="POST" action="{% url 'portal:surat_approve' s.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="approve_rt">
+                                            <button type="submit" class="px-2.5 py-1 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm transition">
+                                                ✓ Setujui RT
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-[11px] text-amber-700 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                            Menunggu Persetujuan RT
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if s.status_surat == 'DISETUJUI_RT' %}
+                                    {% if is_rw_signer or request.user.is_superuser %}
+                                        <!-- RW Approval Button: Khusus Ketua/Sekretaris RW -->
+                                        <form method="POST" action="{% url 'portal:surat_approve' s.id %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="approve_rw">
+                                            <button type="submit" class="px-2.5 py-1 text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white rounded-lg shadow-sm transition">
+                                                ✓ Terbitkan RW
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="text-[11px] text-blue-700 font-medium bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                            Menunggu Terbit RW
+                                        </span>
+                                    {% endif %}
+                                {% endif %}
+
+                                <!-- Print & QR buttons for completed letters -->
+                                {% if s.status_surat == 'DISETUJUI_RW' %}
+                                    <a href="{% url 'portal:surat_print' s.id %}" target="_blank"
+                                        class="px-2.5 py-1 text-xs font-bold bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition shadow-sm">
+                                        🖨️ Cetak / Unduh
+                                    </a>
+                                    <a href="{% url 'portal:verifikasi_surat' s.verification_token %}" target="_blank"
+                                        class="px-2.5 py-1 text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg transition">
+                                        🔍 Cek QR
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400 text-sm">
+                            Tidak ada surat pengantar dalam kategori ini.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

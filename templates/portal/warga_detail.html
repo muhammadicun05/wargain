@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil Warga: {{ warga.nama_lengkap }} — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Back button & Header -->
+    <div class="flex items-center justify-between">
+        <a href="{% url 'portal:warga_list' %}" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+            &larr; Kembali ke Daftar Warga
+        </a>
+        <span class="px-3 py-1 rounded-full text-xs font-bold {% if warga.status_keberadaan == 'AKTIF' %}bg-emerald-100 text-emerald-800 border border-emerald-300{% else %}bg-slate-100 text-slate-700{% endif %}">
+            Status: {{ warga.get_status_keberadaan_display }}
+        </span>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="bg-gradient-to-r from-brand-800 to-brand-900 p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-3xl font-black shadow-inner">
+                    {% if warga.jenis_kelamin == 'L' %}👨{% else %}👩{% endif %}
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight">{{ warga.nama_lengkap }}</h1>
+                    <div class="flex items-center space-x-2 text-xs text-emerald-200 mt-1">
+                        <span class="font-mono bg-white/10 px-2 py-0.5 rounded border border-white/10" id="displayNik">
+                            {{ warga.nik_masked }}
+                        </span>
+                        <span>&bull; {{ warga.get_jenis_kelamin_display }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buka NIK Button: Khusus Pimpinan RT/RW & Admin -->
+            {% if can_unmask %}
+            <div>
+                <button type="button" onclick="openUnmaskModal()" id="btnOpenUnmask"
+                    class="px-3 py-2 bg-emerald-500 hover:bg-emerald-400 text-brand-950 font-bold text-xs rounded-xl shadow transition flex items-center space-x-1">
+                    <span>👁️</span> <span>Lihat NIK Lengkap</span>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Details Grid -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column: Civil Demographics -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-2">
+                    Data Demografi & Catatan Sipil
+                </h3>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                        <span class="text-xs text-slate-400 block">Tempat, Tanggal Lahir</span>
+                        <span class="font-semibold text-slate-700">{{ warga.tempat_lahir }}, {{ warga.tanggal_lahir|date:"d M Y" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Agama</span>
+                        <span class="font-semibold text-slate-700">{{ warga.get_agama_display }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Status Perkawinan</span>
+                        <span class="font-semibold text-slate-700">{{ warga.get_status_perkawinan_display }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Pekerjaan</span>
+                        <span class="font-semibold text-slate-700">{{ warga.pekerjaan|default:"-" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Nomor Telepon / WA</span>
+                        <span class="font-semibold text-slate-700">{{ warga.nomor_telepon|default:"-" }}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400 block">Wilayah Asal Rukun Warga</span>
+                        <span class="font-semibold text-slate-700">{{ warga.rw.nama }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Tri-Axial Dwelling & Family Card -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-2">
+                    Keberadaan Fisik (Hunian & Domisili)
+                </h3>
+                {% if domisili_aktif %}
+                <div class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-800">{{ domisili_aktif.hunian.nomor_rumah }}</span>
+                        <span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 text-emerald-800 rounded">
+                            {{ domisili_aktif.get_peran_di_hunian_display }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-600">{{ domisili_aktif.hunian.alamat_lengkap }}</p>
+                    <div class="text-[11px] text-slate-500">
+                        Wilayah Rukun Tetangga: <strong class="text-slate-700">{{ domisili_aktif.hunian.rt.nama }}</strong>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 italic">Belum dikaitkan dengan hunian fisik lokal.</p>
+                {% endif %}
+
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider border-b pb-2 pt-2">
+                    Hubungan Kartu Keluarga
+                </h3>
+                {% if keanggotaan_kk %}
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm space-y-1">
+                    <div class="font-mono text-xs font-bold text-slate-700">No. KK: {{ keanggotaan_kk.kartu_keluarga.nomor_kk_masked }}</div>
+                    <div class="text-xs font-semibold text-brand-700">Kedudukan: {{ keanggotaan_kk.get_status_hubungan_display }}</div>
+                    <div class="text-[11px] text-slate-500">{{ keanggotaan_kk.kartu_keluarga.alamat_kk }}</div>
+                </div>
+                {% else %}
+                <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                    ℹ️ Warga tercatat tidak memiliki Kartu Keluarga setempat (misal: Penghuni Kos atau Kontrakan asal luar kota).
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- PDP Unmask Modal -->
+<div id="unmaskModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-lg">
+                🛡️
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-slate-800">Akses Data Sensitif Warga</h3>
+                <p class="text-xs text-slate-500">Konfirmasi pembukaan nomor identitas lengkap</p>
+            </div>
+        </div>
+
+        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+            Membuka NIK lengkap akan dicatat permanen dalam riwayat audit sistem termasuk identitas akun pengurus, waktu akses, dan alamat jaringan. Masukkan alasan keperluan kedinasan Anda:
+        </p>
+
+        <form id="unmaskForm" onsubmit="submitUnmask(event)" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-700 mb-1">
+                    Alasan Pembukaan Data Pribadi *
+                </label>
+                <textarea id="alasanUnmask" required rows="2"
+                    class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none"
+                    placeholder="Contoh: Verifikasi Surat Pengantar SKCK No. 045"></textarea>
+            </div>
+
+            <div id="modalError" class="hidden text-xs text-rose-600 font-bold"></div>
+
+            <div class="flex items-center justify-end space-x-2 pt-2">
+                <button type="button" onclick="closeUnmaskModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">
+                    Batal
+                </button>
+                <button type="submit" id="btnSubmitUnmask" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow">
+                    Buka & Catat Log
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openUnmaskModal() {
+        document.getElementById('unmaskModal').classList.remove('hidden');
+    }
+    function closeUnmaskModal() {
+        document.getElementById('unmaskModal').classList.add('hidden');
+    }
+    async function submitUnmask(e) {
+        e.preventDefault();
+        const alasan = document.getElementById('alasanUnmask').value;
+        const errDiv = document.getElementById('modalError');
+        const btn = document.getElementById('btnSubmitUnmask');
+        btn.disabled = true;
+        btn.innerText = "Mendekripsi...";
+
+        try {
+            const formData = new FormData();
+            formData.append('alasan', alasan);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            const resp = await fetch("{% url 'portal:warga_unmask' warga.id %}", {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (resp.ok) {
+                document.getElementById('displayNik').innerHTML = `<span class="text-amber-300 font-bold tracking-widest">${data.raw_nik}</span> <span class="text-[10px] bg-rose-500/80 px-1.5 py-0.5 rounded text-white font-sans">TERDEKRIPSI & TEREKAM AUDIT</span>`;
+                document.getElementById('btnOpenUnmask').remove();
+                closeUnmaskModal();
+            } else {
+                errDiv.innerText = data.error || "Gagal membuka NIK.";
+                errDiv.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "Buka & Catat Log";
+            }
+        } catch (err) {
+            errDiv.innerText = "Terjadi kesalahan jaringan.";
+            errDiv.classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerText = "Buka & Catat Log";
+        }
+    }
+</script>
+{% endblock %}

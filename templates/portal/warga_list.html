@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Warga — WargaIn v2{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-800">Buku Register Warga</h1>
+            <p class="text-sm text-slate-500">Daftar penduduk dan warga yang berdomisili di lingkungan setempat</p>
+        </div>
+        <a href="{% url 'portal:warga_create' %}" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-bold rounded-xl shadow transition flex items-center justify-center space-x-1">
+            <span>+</span> <span>Daftarkan Warga Baru</span>
+        </a>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="GET" class="flex flex-col md:flex-row items-center gap-3">
+            <div class="relative w-full md:flex-1">
+                <input type="text" name="q" value="{{ search }}"
+                    class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 text-sm outline-none transition"
+                    placeholder="Cari nama warga, nomor rumah, atau NIK tersamar...">
+                <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+            </div>
+
+            <div class="w-full md:w-48">
+                <select name="rt" onchange="this.form.submit()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm outline-none bg-white">
+                    <option value="">Semua RT</option>
+                    {% for rt in rt_list %}
+                        <option value="{{ rt.id }}" {% if rt_filter == rt.id|stringformat:'s' %}selected{% endif %}>{{ rt.nama }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="w-full md:w-48">
+                <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm outline-none bg-white">
+                    {% for val, label in status_choices %}
+                        <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="w-full md:w-auto px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition">
+                Cari
+            </button>
+        </form>
+    </div>
+
+    <!-- Residents Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                        <th class="py-3 px-4">Nama Lengkap</th>
+                        <th class="py-3 px-4">NIK (Tersamar)</th>
+                        <th class="py-3 px-4">L/P</th>
+                        <th class="py-3 px-4">Hunian / Alamat</th>
+                        <th class="py-3 px-4">Peran</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4 text-right">Rincian</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for w in warga_list %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-4 font-bold text-slate-800">
+                            <a href="{% url 'portal:warga_detail' w.id %}" class="hover:text-brand-600 transition">
+                                {{ w.nama_lengkap }}
+                            </a>
+                        </td>
+                        <td class="py-3 px-4 font-mono text-xs text-slate-600">
+                            {{ w.nik_masked }}
+                        </td>
+                        <td class="py-3 px-4 font-bold text-xs">
+                            {% if w.jenis_kelamin == 'L' %}
+                                <span class="text-blue-600">L</span>
+                            {% else %}
+                                <span class="text-rose-600">P</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-700">
+                            {% with dom=w.riwayat_domisili.all|first %}
+                                {% if dom %}
+                                    <span class="font-semibold">{{ dom.hunian.nomor_rumah }}</span>
+                                    <span class="text-slate-400">({{ dom.hunian.rt.nama }})</span>
+                                {% else %}
+                                    <span class="text-slate-400 italic">Belum terikat hunian</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="py-3 px-4 text-xs">
+                            {% with dom=w.riwayat_domisili.all|first %}
+                                {% if dom %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                        {{ dom.get_peran_di_hunian_display }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="py-3 px-4 text-xs">
+                            {% if w.status_keberadaan == 'AKTIF' %}
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold rounded-full text-[10px]">Aktif</span>
+                            {% elif w.status_keberadaan == 'MENINGGAL' %}
+                                <span class="px-2 py-0.5 bg-slate-100 text-slate-600 font-bold rounded-full text-[10px]">Meninggal</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-700 font-bold rounded-full text-[10px]">{{ w.get_status_keberadaan_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <a href="{% url 'portal:warga_detail' w.id %}" class="px-3 py-1 bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-lg text-xs font-bold transition">
+                                Buka Profil &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-slate-400 text-sm">
+                            Tidak ada data warga yang cocok dengan kriteria pencarian.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
