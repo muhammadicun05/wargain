@@ -14,7 +14,7 @@ SECRET_KEY_DATA = os.getenv('SECRET_KEY_DATA', 'data-encryption-aes-gcm-key-2026
 
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app,.onrender.com,.hf.space').split(',') if host.strip()]
 if DEBUG and '*' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('*')
 
@@ -26,6 +26,9 @@ CSRF_TRUSTED_ORIGINS += [
     'https://*.ngrok.app',
     'https://*.ngrok.io',
     'https://*.trycloudflare.com',
+    'https://*.onrender.com',
+    'https://*.vercel.app',
+    'https://*.hf.space',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
 ]
@@ -132,7 +135,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (Verification uploads, scanned documents)
 MEDIA_URL = '/media/'

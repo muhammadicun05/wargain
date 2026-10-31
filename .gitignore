@@ -10,7 +10,6 @@ __pycache__/
 *.local
 
 # Django Static & Media
-staticfiles/
 media/
 db.sqlite3
 
